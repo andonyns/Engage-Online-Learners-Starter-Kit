@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Licensed to the Ed-Fi Alliance under one or more agreements.
+# The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
+# See the LICENSE and NOTICES files in the project root for more information.
+
+name: CodeQL Security Scan
+
+# NOTE: there is no CodeQL support for PowerShell. The CodeQL steps will only
+# run if someone adds files from one of the supported languages.
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    env:
+        SRC_DIR: scripts
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b  # v3.0.2
+
+      - name: Search for Code Files
+        id: languages
+        shell: pwsh
+        run: |
+          Write-Output "::set-output name=count::$( (Get-ChildItem -Include *.cs, *.js, *.ts, *.py -Recurse).Count )"
+
+          $languages = @()
+
+          if ((Get-ChildItem -Include *.cs -Recurse).Count -gt 0) {
+            $languages += "csharp"
+          }
+          if ((Get-ChildItem -Include *.ts -Recurse).Count -gt 0) {
+            $languages += "typescript"
+          }
+          if ((Get-ChildItem -Include *.js -Recurse).Count -gt 0) {
+            $languages += "javascript"
+          }
+          if ((Get-ChildItem -Include *.py -Recurse).Count -gt 0) {
+            $languages += "python"
+          }
+          Write-Output "::set-output name=languages::$( $languages -join "," )"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@1fae5bf71b0ecdc7d0a2ef0d0c28409d99693966  # v2.9.2
+        if: steps.languages.outputs.count > 0
+        with:
+          languages: ${{ steps.languages.outputs.languages }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@1fae5bf71b0ecdc7d0a2ef0d0c28409d99693966  # v2.9.2
+        if: steps.languages.outputs.count > 0
