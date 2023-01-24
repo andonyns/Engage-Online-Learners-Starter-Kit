@@ -15,6 +15,7 @@ on:
     paths-ignore:
       - "**/*.md"
       - "**/*.pbix"
+  workflow_dispatch:
 
 jobs:
   scan-actions:
