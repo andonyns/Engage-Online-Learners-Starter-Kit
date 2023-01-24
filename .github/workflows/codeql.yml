@@ -40,6 +40,7 @@ jobs:
           $languages = @()
 
           if ((Get-ChildItem -Include *.cs -Recurse).Count -gt 0) {
+            Write-Output "Found csharp"
             $languages += "csharp"
           }
           if ((Get-ChildItem -Include *.ts -Recurse).Count -gt 0) {
