@@ -5,7 +5,7 @@
 
 name: CodeQL Security Scan
 
-# NOTE: there is no CodeQL support for PowerShell. The CodeQL steps will only
+# NOTE: there's no CodeQL support for PowerShell. The CodeQL steps will only
 # run if someone adds files from one of the supported languages.
 
 on:
