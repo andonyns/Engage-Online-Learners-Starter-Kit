@@ -5,7 +5,7 @@
 
 name: CodeQL Security Scan
 
-# NOTE: there's no CodeQL support for PowerShell. The CodeQL steps will only
+# NOTE: there is no CodeQL support for PowerShell. The CodeQL steps will only
 # run if someone adds files from one of the supported languages.
 
 on:
@@ -31,8 +31,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
+      - name: Search for Code Files
+        id: languages
+        shell: pwsh
+        run: |
+          Write-Output "name=count::$( (Get-ChildItem -Include *.cs, *.js, *.ts, *.py -Recurse).Count )" >> $env:GITHUB_OUTPUT
+
+          $languages = @()
+
+          if ((Get-ChildItem -Include *.cs -Recurse).Count -gt 0) {
+            $languages += "csharp"
+          }
+          if ((Get-ChildItem -Include *.ts -Recurse).Count -gt 0) {
+            $languages += "typescript"
+          }
+          if ((Get-ChildItem -Include *.js -Recurse).Count -gt 0) {
+            $languages += "javascript"
+          }
+          if ((Get-ChildItem -Include *.py -Recurse).Count -gt 0) {
+            $languages += "python"
+          }
+          Write-Output "name=languages::$( $languages -join "," )" >> $env:GITHUB_OUTPUT
+
+      - name: Code files result
+        if: steps.languages.outputs.count == 0
+        run: |
+          echo '::notice:: No files found'
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@896079047b4bb059ba6f150a5d87d47dde99e6e5 # v2.11.6
+        if: steps.languages.outputs.count > 0
+        with:
+          languages: ${{ steps.languages.outputs.languages }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@896079047b4bb059ba6f150a5d87d47dde99e6e5 # v2.11.6
+        if: steps.languages.outputs.count > 0
