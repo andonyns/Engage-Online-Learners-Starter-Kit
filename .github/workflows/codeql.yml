@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Output "name=count::$( (Get-ChildItem -Include *.cs, *.js, *.ts, *.py -Recurse).Count )" >> $env:GITHUB_OUTPUT
-
+          Write-Output "Checking"
           $languages = @()
 
           if ((Get-ChildItem -Include *.cs -Recurse).Count -gt 0) {
@@ -51,7 +51,8 @@ jobs:
           if ((Get-ChildItem -Include *.py -Recurse).Count -gt 0) {
             $languages += "python"
           }
-          Write-Host $languages
+          Write-Output "Found"
+          Write-Output $languages
           Write-Output "name=languages::$( $languages -join "," )" >> $env:GITHUB_OUTPUT
 
       - name: Code files result
